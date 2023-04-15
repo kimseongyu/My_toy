@@ -13,26 +13,32 @@ translator = googletrans.Translator()
 sheet = wb.active
 
 # A행에 대해 반복
-for cell in sheet['A']:
+for cell in sheet['A'][1:]:
     # 영어 단어와 품사 가져오기
     eng_word = cell.value
     
     # 한국어 단어로 번역 및 파싱
-    try: korean_words = translator.translate(eng_word, src ='en', dest = 'ko').extra_data['parsed'][1][0][0][5][0][4]
-    except: korean_words = translator.translate(eng_word, src ='en', dest = 'ko').extra_data['parsed'][1][0][0][5][0][4]
+    korean_words = []
+    while len(korean_words) == 0:
+        try: korean_words = translator.translate(eng_word, src ='en', dest = 'ko').extra_data['parsed'][1][0][0][5][0][4]
+        except: continue
     
     # 단어장에 삽입될 한국어 단어
     korean_word = ""
     
-    # 단어장에 단어 추가, count:최대 단어 갯수
+    # 단어장에 단어 추가, max:최대 단어 갯수
+    max = 2
     count = 0 
     for i in korean_words:
-        if count > 1: break
-        korean_word += i[0] + ', '
+        if count > max-1: break
+        elif count == max-1:
+            korean_word += i[0]
+        else:
+            korean_word += i[0] + ', '
         count += 1
-    
     # c 행에 한국어 단어 쓰기
-    sheet.cell(row=cell.row, column=2, value=korean_word)
+    try:sheet.cell(row=cell.row, column=3, value=korean_word)
+    except:continue
 
 # 변경 내용 저장
 wb.save('translate.xlsx')
